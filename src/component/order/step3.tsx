@@ -96,7 +96,7 @@ export const Step3 = ({
           <div className="">
             <label
               htmlFor="addDish"
-              className="block text-sm text-gray-600 font-medium "
+              className="block text-sm text-gray-600 font-medium add_Dish"
             ></label>
             <select
               id={`addDish-${k + 1}`}
@@ -121,11 +121,6 @@ export const Step3 = ({
                 >{`${v.label}`}</option>
               ))}
             </select>
-            {/* { dishData?.find(v=>v.dishId !== 'dish')?.name === undefined && valid &&(
-            <p className="text-red-500 text-xs italic p-2">
-              * Please choose a dish.*
-            </p>
-          )} */}
           </div>
           <input
             type="number"
@@ -142,11 +137,6 @@ export const Step3 = ({
             required
             style={{ outline: "none" }}
           />
-          {/* { dishData?.find(v=>v.dishId !== 'dish')?.no_serving=== undefined && valid &&(
-            <p className="text-red-500 text-xs italic p-2">
-              * Please insert serving.*
-            </p>
-          )} */}
         </div>
       ))}
       <div className="grid grid-col-1 mt-5">

@@ -151,8 +151,6 @@ const Order = () => {
         } else if (current === 3 && 
           dish.length>0 && 
           no_serving !== undefined  
-          // dish?.find(v=>v.dishId !== 'dish')?.name !== undefined &&
-          // dish?.find(v=>v.dishId !== 'dish')?.no_serving !== undefined
         ){
           setCurrentTab(4)  
         }else{
