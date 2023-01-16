@@ -6,7 +6,12 @@ const Order = () => {
   const [selectMeal, setSelectMeal] = useState("");
   const [numberPeople, setNumberPeople] = useState(1);
   const [currentTab, setCurrentTab] = useState<number>(1);
-  const [restaurant, setRestaurant] = useState("");
+  const [restaurant, setRestaurant]=  useState<Array<{
+    id?: string;
+    name: string
+  }>
+  >([]);
+
   const [dish, setDish] = useState<
     Array<{
       id?: string;
@@ -15,10 +20,10 @@ const Order = () => {
       no_serving?: string;
     }>
   >([]);
+  const [valid,setValid]=useState(false)
   const [btnEnable, setbtnEnable] = useState<boolean>(false);
   const [newRow, setNewRow] = useState(0);
   const [addDisable, setAddDisable] = useState(false);
-
 
   const mealOption = DishData.dishes.filter(
     (v) => v.availableMeals.length >= 3
@@ -53,7 +58,7 @@ const Order = () => {
   const dishOption = DishData.dishes.filter(
     (v) =>
       v.availableMeals?.includes(`${selectMeal}`) &&
-      v.restaurant?.includes(`${restaurant}`)
+      v.restaurant?.includes(`${restaurant?.map(v=>v.name)}`)
   );
 
   const dishName = dishOption?.map((v) => {
@@ -71,10 +76,10 @@ const Order = () => {
   });
 
   const handleTabClick = (event: any, current: number) => {
-    if (btnEnable) {
-      setCurrentTab(current);
-    }
-  };
+      if(btnEnable){
+        setCurrentTab(current)
+      }
+    };
 
   const handleStep1 = (e: any, type: string) => {
     if (type === "meal" && e.target.value) {
@@ -82,75 +87,80 @@ const Order = () => {
     } else if (e.target.value >= 1 && e.target.value <= 10) {
       setNumberPeople(e.target.value);
     }
-
     setbtnEnable(true);
   };
 
   const handleStep2 = (e: any) => {
-    if (e.target.value) {
-      setRestaurant(e.target.value);
+    const { id, value } = e.target;
+    const name = restaurantData?.filter((d) => d.value === value)[0].label
+    if (id && value) {
+      const restaurantData={id: value,name: name}
+      setRestaurant([restaurantData]);
     }
     setbtnEnable(true);
   };
 
   const handleStep3 = (e: any) => {
     setAddDisable(false);
+    const { id, value } = e.target;
     const isDuplicate =
-      dish.length > 0 &&
-      dish.filter((d) => d.dishId === e.target.id).length > 0;
-    const index = dish.findIndex((d) => d.dishId === e.target.id);
-    const name = dishOptionData.filter((d) => d.value === e.target.value)[0]
-      .label;
-    const selectedData = {
-      id: e.target.value,
-      dishId: e.target.id,
-      name: name,
-    };
+      dish.length > 0 && dish.filter((d) => d.dishId === id).length > 0;
+    const index = dish.findIndex((d) => d.dishId === id);
+    const name = dishOptionData.filter((d) => d.value === value)[0].label;
+    const obj = dish.find((v) => v.dishId === id);
+    const newObj = { ...obj, id: value, dishId: id, name: name };
 
     if (isDuplicate) {
-      console.log("Updating.....");
-
       setDish(dish.splice(index, 1));
-      setDish(dish.concat(selectedData));
+      setDish(dish.concat(newObj));
     } else {
-      console.log("Creating....");
-      setDish(dish.concat(selectedData));
+      setDish(dish.concat(newObj));
     }
   };
 
   const handleStep3TextChange = (e: any, valueFor: string) => {
-    const isDuplicate =
-      dish.length > 0 && dish.filter((d) => d.dishId === valueFor).length > 0;
+    const { value } = e.target;
 
+    const isDuplicate =
+    dish.length > 0 && dish.filter((d) => d.dishId === valueFor).length > 0;
     const index = dish.findIndex((d) => d.dishId === valueFor);
     const obj = dish.find((v) => v.dishId === valueFor);
-    const newObj = { ...obj, no_serving: e.target.value };
-    // console.log(newObj);
-
-    //  setDish(dish.splice(index,1,newObj))
+  
+    const newObj = obj
+      ? { ...obj, no_serving: value }
+      : { dishId: valueFor, no_serving: value  ? value: '1'};
+   
     if (isDuplicate) {
       setDish(dish.splice(index, 1));
       setDish(dish.concat(newObj));
     } else {
-      console.log("Creating....");
       setDish(dish.concat(newObj));
     }
+     
   };
- 
+
   const handleNext = (e: any, current: number) => {
-    e.preventDefault();
-    setbtnEnable(false);
-    if (current === 1 && selectMeal && numberPeople) {
-      setCurrentTab(2);
-    } else if (current === 2 && restaurant) {
-      setCurrentTab(3);
-    } else {
-      setCurrentTab(4)
-      
-    }
-  }
-  // console.log('dish',dish);
-  
+        e.preventDefault();
+        setbtnEnable(false);
+        setValid(false)
+        const no_serving=dish?.find(v=>v.no_serving)
+        if (current === 1 && selectMeal && numberPeople) {
+          setCurrentTab(2);
+        } else if (current === 2 && restaurant.length >0) {
+          setCurrentTab(3);
+        } else if (current === 3 && 
+          dish.length>0 && 
+          no_serving !== undefined  
+          // dish?.find(v=>v.dishId !== 'dish')?.name !== undefined &&
+          // dish?.find(v=>v.dishId !== 'dish')?.no_serving !== undefined
+        ){
+          setCurrentTab(4)  
+        }else{
+         setValid(true)
+        }
+      }
+
+
   const handlePrevious = (e: any, current: number) => {
     e.preventDefault();
     if (current === 4) {
@@ -159,16 +169,25 @@ const Order = () => {
       setCurrentTab(2);
     } else if (current === 2) {
       setCurrentTab(1);
+    }else if (current ===1){
     }
   };
 
   const addRow = () => {
     const maxRow = dishOptionData.length - 1;
-    // console.log(maxRow);
     if (newRow < maxRow) {
       setNewRow(newRow + 1);
     }
   };
+  
+  useEffect(()=>{
+
+  if (newRow +1 > dishOptionData.length){
+    setDish([])
+    setNewRow(0)
+  }
+  },[newRow,dishOptionData])
+ 
   return (
     <div className="flex flex-wrap items-center justify-center">
       <div
@@ -186,12 +205,14 @@ const Order = () => {
             selectMeal={selectMeal}
             numberPeople={numberPeople}
             btnEnable={btnEnable}
+            valid={valid}
           />
         ) : currentTab === 2 ? (
           <MyComponent.Step2
             restaurant={restaurant}
             handleStep2={handleStep2}
             restaurantData={restaurantData}
+            valid={valid}
           />
         ) : currentTab === 3 ? (
           <MyComponent.Step3
@@ -202,13 +223,14 @@ const Order = () => {
             newRow={newRow}
             addDisable={addDisable}
             handleStep3TextChange={handleStep3TextChange}
+            valid={valid}
           />
         ) : (
-          <MyComponent.Step4 
-          orderData={dish}
-          meals={selectMeal}
-          restaurant={restaurant}
-          no_people={numberPeople}
+          <MyComponent.Step4
+            orderData={dish}
+            meals={selectMeal}
+            restaurant={restaurant}
+            no_people={numberPeople}
           />
         )}
         <MyComponent.Navigator
@@ -216,6 +238,10 @@ const Order = () => {
           currentTab={currentTab}
           handleNext={handleNext}
           handlePrevious={handlePrevious}
+          orderData={dish}
+          meals={selectMeal}
+          restaurant={restaurant}
+          no_people={numberPeople}
         />
       </div>
     </div>

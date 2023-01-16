@@ -4,8 +4,9 @@ type RowProps={
     handleStep1: (e:any,type: string)=>void, 
     numberPeople: number,
     btnEnable: boolean
+    valid:boolean
 }
-export const Step1=({dishData,selectMeal,handleStep1,numberPeople,btnEnable}: RowProps)=>{
+export const Step1=({dishData,selectMeal,handleStep1,numberPeople,btnEnable,valid}: RowProps)=>{
 
     return(
         <div>
@@ -14,13 +15,13 @@ export const Step1=({dishData,selectMeal,handleStep1,numberPeople,btnEnable}: Ro
                     <select value={selectMeal} onChange={(e:any)=>handleStep1(e,'meal')} id="meals" className="text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-100 dark:border-gray-50 dark:placeholder-gray-50 dark:focus:ring-blue-500 dark:focus:border-blue-500" style={{outline: 'none'}}>
                         <option value={''} disabled>Choose a meal</option>
                         {
-                        dishData?.map((v,k)=>        
+                            dishData?.map((v,k)=>        
                                 <option key={k} value={`${v.value}`} >{`${v.label}`}</option>
                             )
                         }
                     </select> 
                   {
-                    !selectMeal && 
+                    !selectMeal && valid &&
                     <p className="text-red-500 text-xs italic p-2">* Please choose a meal.*</p>
                   }
                  
